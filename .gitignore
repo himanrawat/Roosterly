@@ -1,0 +1,28 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Assignment PDFs contain the helpdesk key; keep them out of the repo
+*.pdf
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Run logs (keep the folder)
+logs/*
+!logs/.gitkeep
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
