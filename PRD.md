@@ -3,12 +3,12 @@
 ## Metadata
 
 - **Project:** Roosterly support ticket agent
-- **Status:** Draft
+- **Status:** Implemented (see README.md for the decisions taken on the open questions)
 - **Document owner:** Himanshu Rawat
 - **Target ship date:** Not specified
 - **Assignment received:** 16 November 2026, 13:26 IST
 - **Assignment deadline:** 19 November 2026, 13:26 IST (72 hours after receipt)
-- **AI provider:** Groq, as chosen for this project. The model and API integration details are not yet specified.
+- **AI provider:** Groq, as chosen for this project. Model: `openai/gpt-oss-120b`.
 
 ## Problem and objective
 
@@ -107,7 +107,7 @@ No screens, wireframes, or mockups are required.
 ## Constraints and dependencies
 
 - The helpdesk API, `api_reference.md`, and `faq.md` define the external contract and allowed customer knowledge.
-- Groq is the selected AI provider. A Groq API key is required; no specific model has been selected.
+- Groq is the selected AI provider. A Groq API key is required; the model is `openai/gpt-oss-120b`.
 - Most tickets are in Dutch. Customer replies match the customer's language; handoff notes are in English.
 - A paid model should cost well under EUR 1 for the assignment, according to the brief. Actual cost depends on the chosen model and measured token use.
 - The API contains 30 practice tickets and 10 separate labelled examples. Examples cannot be handled through the action endpoints.

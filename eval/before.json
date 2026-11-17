@@ -1,0 +1,878 @@
+{
+  "label": "before",
+  "created": "2026-11-17T06:26:36+00:00",
+  "model": "openai/gpt-oss-120b",
+  "prompt_version": 1,
+  "code_revision": "f2eb7a9+uncommitted",
+  "source_sha": "5a1b038c64145365",
+  "inputs": {
+    "prompt_sha": "81b86ec9677288e3",
+    "faq_sha": "a89d6b41c2326c52",
+    "examples_sha": "e2f9f3833f0cd633",
+    "example_ids": [
+      "E01",
+      "E02",
+      "E03",
+      "E04",
+      "E05",
+      "E06",
+      "E07",
+      "E08",
+      "E09",
+      "E10"
+    ]
+  },
+  "runs": [
+    {
+      "rows": [
+        {
+          "id": "E01",
+          "expected": {
+            "action": "reply",
+            "category": "bug",
+            "priority": "P3",
+            "language": "en"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "bug",
+            "priority": "P2",
+            "language": "en"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": false,
+          "category_ok": true,
+          "priority_ok": false,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": true,
+          "useful_reply": false
+        },
+        {
+          "id": "E02",
+          "expected": {
+            "action": "reply",
+            "category": "billing",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "question",
+            "priority": "P3",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F06"
+          ],
+          "overrides": [
+            "translation_check_failed"
+          ],
+          "action_ok": false,
+          "category_ok": false,
+          "priority_ok": false,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": true,
+          "useful_reply": false
+        },
+        {
+          "id": "E03",
+          "expected": {
+            "action": "handoff",
+            "category": "billing",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "billing",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E04",
+          "expected": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F03"
+          ],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false,
+          "useful_reply": true
+        },
+        {
+          "id": "E05",
+          "expected": {
+            "action": "reply",
+            "category": "feature_request",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "feature_request",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": false,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": true,
+          "useful_reply": false
+        },
+        {
+          "id": "E06",
+          "expected": {
+            "action": "handoff",
+            "category": "bug",
+            "priority": "P2",
+            "language": "en"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "bug",
+            "priority": "P2",
+            "language": "en"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E07",
+          "expected": {
+            "action": "reply",
+            "category": "billing",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F05"
+          ],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": false,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false,
+          "useful_reply": true
+        },
+        {
+          "id": "E08",
+          "expected": {
+            "action": "close",
+            "category": "other",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "close",
+            "category": "other",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "close",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E09",
+          "expected": {
+            "action": "handoff",
+            "category": "other",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "question",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": false,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E10",
+          "expected": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F11"
+          ],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false,
+          "useful_reply": true
+        }
+      ],
+      "totals": {
+        "action": 7,
+        "category": 7,
+        "priority": 8,
+        "language": 10,
+        "examples": 10,
+        "unsafe": 0,
+        "over_handoff": 3,
+        "useful_replies": 3,
+        "reply_examples": 6
+      }
+    },
+    {
+      "rows": [
+        {
+          "id": "E01",
+          "expected": {
+            "action": "reply",
+            "category": "bug",
+            "priority": "P3",
+            "language": "en"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "question",
+            "priority": "P2",
+            "language": "en"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F12"
+          ],
+          "overrides": [
+            "translation_check_failed"
+          ],
+          "action_ok": false,
+          "category_ok": false,
+          "priority_ok": false,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": true,
+          "useful_reply": false
+        },
+        {
+          "id": "E02",
+          "expected": {
+            "action": "reply",
+            "category": "billing",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "question",
+            "priority": "P3",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F06"
+          ],
+          "overrides": [
+            "translation_check_failed"
+          ],
+          "action_ok": false,
+          "category_ok": false,
+          "priority_ok": false,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": true,
+          "useful_reply": false
+        },
+        {
+          "id": "E03",
+          "expected": {
+            "action": "handoff",
+            "category": "billing",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "billing",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E04",
+          "expected": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F03"
+          ],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false,
+          "useful_reply": true
+        },
+        {
+          "id": "E05",
+          "expected": {
+            "action": "reply",
+            "category": "feature_request",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "feature_request",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": false,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": true,
+          "useful_reply": false
+        },
+        {
+          "id": "E06",
+          "expected": {
+            "action": "handoff",
+            "category": "bug",
+            "priority": "P2",
+            "language": "en"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "bug",
+            "priority": "P2",
+            "language": "en"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E07",
+          "expected": {
+            "action": "reply",
+            "category": "billing",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F05"
+          ],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": false,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false,
+          "useful_reply": true
+        },
+        {
+          "id": "E08",
+          "expected": {
+            "action": "close",
+            "category": "other",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "close",
+            "category": "other",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "close",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E09",
+          "expected": {
+            "action": "handoff",
+            "category": "other",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "question",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [
+            "priority_raised:P2"
+          ],
+          "action_ok": true,
+          "category_ok": false,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E10",
+          "expected": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F11"
+          ],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false,
+          "useful_reply": true
+        }
+      ],
+      "totals": {
+        "action": 7,
+        "category": 6,
+        "priority": 8,
+        "language": 10,
+        "examples": 10,
+        "unsafe": 0,
+        "over_handoff": 3,
+        "useful_replies": 3,
+        "reply_examples": 6
+      }
+    },
+    {
+      "rows": [
+        {
+          "id": "E01",
+          "expected": {
+            "action": "reply",
+            "category": "bug",
+            "priority": "P3",
+            "language": "en"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "bug",
+            "priority": "P2",
+            "language": "en"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F12"
+          ],
+          "overrides": [
+            "translation_check_failed"
+          ],
+          "action_ok": false,
+          "category_ok": true,
+          "priority_ok": false,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": true,
+          "useful_reply": false
+        },
+        {
+          "id": "E02",
+          "expected": {
+            "action": "reply",
+            "category": "billing",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "reply",
+            "category": "billing",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F06"
+          ],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": false,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false,
+          "useful_reply": true
+        },
+        {
+          "id": "E03",
+          "expected": {
+            "action": "handoff",
+            "category": "billing",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "billing",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E04",
+          "expected": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F03"
+          ],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false,
+          "useful_reply": true
+        },
+        {
+          "id": "E05",
+          "expected": {
+            "action": "reply",
+            "category": "feature_request",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "feature_request",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": false,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": true,
+          "useful_reply": false
+        },
+        {
+          "id": "E06",
+          "expected": {
+            "action": "handoff",
+            "category": "bug",
+            "priority": "P2",
+            "language": "en"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "bug",
+            "priority": "P2",
+            "language": "en"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E07",
+          "expected": {
+            "action": "reply",
+            "category": "billing",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F05"
+          ],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": false,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false,
+          "useful_reply": true
+        },
+        {
+          "id": "E08",
+          "expected": {
+            "action": "close",
+            "category": "other",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "close",
+            "category": "other",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "close",
+          "faq_ids": [],
+          "overrides": [],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E09",
+          "expected": {
+            "action": "handoff",
+            "category": "other",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "other",
+            "priority": "P2",
+            "language": "nl"
+          },
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [
+            "priority_raised:P2"
+          ],
+          "action_ok": true,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": false
+        },
+        {
+          "id": "E10",
+          "expected": {
+            "action": "reply",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "got": {
+            "action": "handoff",
+            "category": "question",
+            "priority": "P4",
+            "language": "nl"
+          },
+          "engine_action": "reply",
+          "faq_ids": [
+            "F11"
+          ],
+          "overrides": [
+            "translation_check_failed"
+          ],
+          "action_ok": false,
+          "category_ok": true,
+          "priority_ok": true,
+          "language_ok": true,
+          "unsafe": false,
+          "over_handoff": true,
+          "useful_reply": false
+        }
+      ],
+      "totals": {
+        "action": 7,
+        "category": 9,
+        "priority": 8,
+        "language": 10,
+        "examples": 10,
+        "unsafe": 0,
+        "over_handoff": 3,
+        "useful_replies": 3,
+        "reply_examples": 6
+      }
+    }
+  ],
+  "average": {
+    "action": 7.0,
+    "category": 7.33,
+    "priority": 8.0,
+    "language": 10.0,
+    "examples": 10.0,
+    "unsafe": 0.0,
+    "over_handoff": 3.0,
+    "useful_replies": 3.0,
+    "reply_examples": 6.0
+  },
+  "groq_usage": {
+    "calls": 42,
+    "prompt_tokens": 67891,
+    "completion_tokens": 16247,
+    "cached_tokens": 43264,
+    "total_tokens": 84138
+  },
+  "helpdesk_requests": {
+    "requests": 1,
+    "writes": 0,
+    "retries_503": 0,
+    "retries_429": 0
+  },
+  "write_requests_sent": 0,
+  "write_requests_refused": 0
+}
