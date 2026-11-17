@@ -318,7 +318,7 @@ class RunTests(unittest.TestCase):
     def test_validation_error_is_logged_and_run_continues(self):
         hd = FakeHelpdesk(["T1", "T2"], fail={"T1": [HelpdeskError(422, "validation_failed")]})
         summary = self._run(hd)
-        self.assertEqual(summary["outcomes"], {"error_422_validation_failed_left_open": 1, "posted": 1})
+        self.assertEqual(summary["outcomes"], {"error_422_left_open": 1, "posted": 1})
         self.assertEqual(hd.handled, {"T2": "handoff"})
         self.assertEqual(self._pending(), [])
 

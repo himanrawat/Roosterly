@@ -321,7 +321,8 @@ class Runner:
             # The helpdesk answered the POST with an error, so nothing was saved.
             # 400/404/422 = our request is wrong; 401/403 = credentials. Not retried unchanged.
             clear_pending(self.log_dir, ticket_id)
-            self._finish(record(f"error_{exc.status}_{exc.error}_left_open"), ATTEMPTS_LOG)
+            # Only the status code is logged: the server's error text is free text.
+            self._finish(record(f"error_{exc.status}_left_open"), ATTEMPTS_LOG)
             if exc.status in (401, 403):
                 raise RunAborted(f"helpdesk rejected the credentials ({exc.status})") from exc
             return None
