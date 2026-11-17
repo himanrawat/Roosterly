@@ -18,9 +18,12 @@ __pycache__/
 htmlcov/
 *.egg-info/
 
-# Run logs (keep the folder)
+# Run logs: only the decision and attempt logs of the final run are committed.
+# They hold ids, enum values, numbers and rule names; no ticket text, no keys.
 logs/*
 !logs/.gitkeep
+!logs/decisions.jsonl
+!logs/attempts.jsonl
 
 # OS / editor
 .DS_Store

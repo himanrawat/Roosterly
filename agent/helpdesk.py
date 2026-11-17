@@ -80,7 +80,7 @@ class HelpdeskClient:
         self.max_429_retries = max_429_retries
         self.limiter = RateLimiter()
         self.session = session or requests.Session()
-        self.stats = {"requests": 0, "retries_503": 0, "retries_429": 0}
+        self.stats = {"requests": 0, "writes": 0, "retries_503": 0, "retries_429": 0}
         self._headers = {
             "Authorization": f"Bearer {settings.helpdesk_api_key}",
             "X-Candidate-Email": settings.candidate_email,
@@ -98,11 +98,13 @@ class HelpdeskClient:
         while True:
             self.limiter.wait()
             self.stats["requests"] += 1
+            if method != "GET":
+                self.stats["writes"] += 1
             try:
                 resp = self.session.request(
                     method, url, headers=self._headers, params=params, json=json, timeout=self.timeout
                 )
-            except (requests.Timeout, requests.ConnectionError) as exc:
+            except requests.RequestException as exc:  # timeout, dropped connection, broken response
                 if method == "GET":
                     attempts_503 += 1
                     if attempts_503 > self.max_503_retries:
