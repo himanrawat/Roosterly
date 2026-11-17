@@ -187,7 +187,7 @@ def main(argv: list[str] | None = None) -> int:
     out = {
         "label": args.label,
         "created": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "model": settings.groq_model,
+        "model": engine._model_name(settings),
         "prompt_version": args.prompt_version,
         "code_revision": _git_revision(),
         "source_sha": _source_sha(),
@@ -199,7 +199,7 @@ def main(argv: list[str] | None = None) -> int:
         },
         "runs": runs,
         "average": average,
-        "groq_usage": engine.usage_totals(),
+        "model_usage": engine.usage_totals(),
         "helpdesk_requests": dict(hd.stats),
         "write_requests_sent": hd.stats["writes"],  # counted in HelpdeskClient._request; must be 0
         "write_requests_refused": hd.refused_writes,

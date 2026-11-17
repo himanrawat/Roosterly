@@ -63,7 +63,7 @@ LOCK_FILE = ".run.lock"
 SAVED_OUTCOMES = ("posted", "posted_confirmed_after_timeout", "handled_confirmed_after_crash",
                   "handled_after_timeout_unknown_source")
 
-# A dead model or a wrong Groq key makes every ticket fail the same way. One failure is
+# A dead model or a wrong provider configuration makes every ticket fail the same way. One failure is
 # handed to a human; this many in a row stops the run before anything is posted for them.
 MAX_CONSECUTIVE_ENGINE_FAILURES = 3
 
@@ -381,8 +381,8 @@ def run(settings: Settings, hd: HelpdeskClient, *, log_dir: Path = LOG_DIR, limi
                     for item in held:
                         runner.left_open(*item, outcome="engine_failed_left_open")
                     raise RunAborted(
-                        f"decision engine failed on {len(held)} tickets in a row; check GROQ_API_KEY "
-                        "and GROQ_MODEL. Nothing was posted for those tickets; rerun when fixed."
+                        f"decision engine failed on {len(held)} tickets in a row; check the "
+                        "selected provider and model. Nothing was posted for those tickets; rerun when fixed."
                     )
                 continue
             # The engine works, so earlier failures were isolated: a human gets those tickets.
@@ -401,7 +401,7 @@ def run(settings: Settings, hd: HelpdeskClient, *, log_dir: Path = LOG_DIR, limi
             "outcomes": dict(runner.outcomes),
             "actions": dict(runner.actions),
             "seconds": round(time.monotonic() - started, 1),
-            "groq_usage": engine.usage_totals(),
+            "model_usage": engine.usage_totals(),
             "helpdesk_requests": dict(hd.stats),
         }
     finally:

@@ -1,11 +1,11 @@
-"""Decision engine (Phase 2): one Groq call per ticket, turned into a validated `Decision`.
+"""Decision engine: one model call per ticket, turned into a validated `Decision`.
 
 Flow for one ticket:
 
     decide(ticket)
       -> build_system_prompt()      fixed text: rules + FAQ (same for every ticket)
       -> build_user_message(ticket) the ticket, JSON-encoded as untrusted data
-      -> Groq chat completion       JSON output, temperature 0
+      -> selected model             JSON output
       -> parse_decision(raw)        strict validation, raises DecisionError
       -> enforce_engine_rules(d)    code-side "unsure" rule and language fallback
 
@@ -38,7 +38,7 @@ MAX_SUBJECT_CHARS = 300
 # json_object mode, which only guarantees "valid JSON", not our field list.
 JSON_SCHEMA_MODELS = ("openai/gpt-oss-120b", "openai/gpt-oss-20b")
 
-# One record per Groq call: {"call", "model", "prompt_tokens", "completion_tokens", "cached_tokens"}.
+# One record per inference call: {"call", "model", "prompt_tokens", "completion_tokens", "cached_tokens"}.
 USAGE: list[dict] = []
 
 
@@ -371,7 +371,7 @@ def _first_sentence(text: str) -> str:
 
 
 # --------------------------------------------------------------------------
-# Groq calls
+# Model calls
 # --------------------------------------------------------------------------
 
 def decide(ticket: dict, *, client=None, settings: Settings | None = None) -> Decision:
@@ -388,8 +388,13 @@ def decide(ticket: dict, *, client=None, settings: Settings | None = None) -> De
         )
 
     settings = settings or load_settings()
-    client = client or _groq_client(settings.groq_api_key)
-    model = settings.groq_model
+    if client is None:
+        try:
+            client = _inference_client(settings)
+        except Exception as exc:
+            log.warning("Model load failed: %s", type(exc).__name__)
+            return _fallback(f"model load error ({type(exc).__name__})")
+    model = _model_name(settings)
     messages = [
         {"role": "system", "content": build_system_prompt()},
         {"role": "user", "content": build_user_message(ticket)},
@@ -400,8 +405,8 @@ def decide(ticket: dict, *, client=None, settings: Settings | None = None) -> De
         try:
             raw = _chat(client, model, messages, _response_format(model), call="decide")
         except Exception as exc:  # network, auth, rate limit after the SDK's own retries
-            log.warning("Groq call failed: %s", type(exc).__name__)
-            return _fallback(f"Groq API error ({type(exc).__name__})")
+            log.warning("Model call failed: %s", type(exc).__name__)
+            return _fallback(f"model call error ({type(exc).__name__})")
         try:
             return enforce_engine_rules(parse_decision(raw))
         except DecisionError as exc:
@@ -425,7 +430,8 @@ def back_translate(text: str, source_language: str, *, client=None, settings: Se
     if not text.strip() or source_language == "en":
         return text
     settings = settings or load_settings()
-    client = client or _groq_client(settings.groq_api_key)
+    if client is None:
+        client = _inference_client(settings)
     system = (
         "You are a literal translator. Translate the user's text into English.\n"
         f"The text is a customer-support reply written in language '{source_language}'.\n"
@@ -436,14 +442,14 @@ def back_translate(text: str, source_language: str, *, client=None, settings: Se
         "Output only the English translation."
     )
     messages = [{"role": "system", "content": system}, {"role": "user", "content": text}]
-    translation = _chat(client, settings.groq_model, messages, None, call="back_translate").strip()
+    translation = _chat(client, _model_name(settings), messages, None, call="back_translate").strip()
     if not translation:
         raise DecisionError("back-translation came back empty")
     return translation
 
 
 def usage_totals() -> dict:
-    """Sum of all recorded Groq calls, for cost measurement."""
+    """Sum of all recorded inference calls, for cost and throughput measurement."""
     prompt = sum(u["prompt_tokens"] for u in USAGE)
     completion = sum(u["completion_tokens"] for u in USAGE)
     return {
@@ -457,6 +463,13 @@ def usage_totals() -> dict:
 
 def _chat(client, model: str, messages: list[dict], response_format: dict | None, *, call: str) -> str:
     """One chat-completions call. Records token usage and returns the message text."""
+    if hasattr(client, "generate"):
+        content, prompt_tokens, completion_tokens = client.generate(
+            messages, max_new_tokens=900 if call == "decide" else 600
+        )
+        USAGE.append({"call": call, "model": model, "prompt_tokens": prompt_tokens,
+                      "completion_tokens": completion_tokens, "cached_tokens": 0})
+        return content
     kwargs = {"model": model, "messages": messages, "temperature": 0}
     if response_format is not None:
         kwargs["response_format"] = response_format
@@ -472,6 +485,17 @@ def _chat(client, model: str, messages: list[dict], response_format: dict | None
         "cached_tokens": getattr(details, "cached_tokens", 0) or 0,
     })
     return response.choices[0].message.content or ""
+
+
+def _model_name(settings: Settings) -> str:
+    return settings.local_model if settings.provider == "local" else settings.groq_model
+
+
+def _inference_client(settings: Settings):
+    if settings.provider == "local":
+        from agent.local_model import get_local_model
+        return get_local_model(settings.local_model)
+    return _groq_client(settings.groq_api_key)
 
 
 @lru_cache(maxsize=2)

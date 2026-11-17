@@ -6,11 +6,12 @@ import sys
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from agent import decide as engine  # noqa: E402
-from agent.config import Settings  # noqa: E402
+from agent.config import Settings, load_settings  # noqa: E402
 from agent.schema import Decision, faq_sections  # noqa: E402
 
 
@@ -43,6 +44,16 @@ class FakeGroq:
             choices=[SimpleNamespace(message=SimpleNamespace(content=content))],
             usage=SimpleNamespace(prompt_tokens=100, completion_tokens=20),
         )
+
+
+class FakeLocal:
+    def __init__(self, outputs):
+        self.outputs = list(outputs)
+        self.calls = []
+
+    def generate(self, messages, *, max_new_tokens):
+        self.calls.append((messages, max_new_tokens))
+        return self.outputs.pop(0), 80, 20
 
 
 def _reply(**changes) -> dict:
@@ -272,6 +283,23 @@ class DecideTests(unittest.TestCase):
         self.assertEqual(call["response_format"], {"type": "json_object"})
         self.assertEqual([m["role"] for m in call["messages"]], ["system", "user"])
         self.assertIn("Ik ben mijn wachtwoord vergeten.", call["messages"][1]["content"])
+
+    def test_local_provider_uses_same_parser_and_records_usage(self):
+        local = FakeLocal([json.dumps(_reply())])
+        settings = Settings(**{**vars(_settings()), "provider": "local", "local_model": "test-local"})
+        decision = engine.decide(TICKET, client=local, settings=settings)
+        self.assertEqual(decision.action, "reply")
+        self.assertEqual(local.calls[0][1], 900)
+        self.assertEqual(engine.USAGE[0]["model"], "test-local")
+        self.assertEqual(engine.usage_totals()["total_tokens"], 100)
+
+    def test_local_provider_does_not_require_groq_key(self):
+        env = {"AGENT_PROVIDER": "local", "HELPDESK_API_KEY": "nrd_test",
+               "CANDIDATE_EMAIL": "test@example.com", "GROQ_API_KEY": ""}
+        with mock.patch.dict("os.environ", env):
+            settings = load_settings()
+        self.assertEqual(settings.provider, "local")
+        self.assertEqual(settings.groq_api_key, "")
 
     def test_json_schema_mode_for_supported_models(self):
         fmt = engine._response_format(engine.JSON_SCHEMA_MODELS[0])

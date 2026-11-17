@@ -1,0 +1,4 @@
+-r requirements.txt
+transformers>=4.51,<5
+accelerate>=1.0
+bitsandbytes>=0.45

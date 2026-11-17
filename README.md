@@ -13,9 +13,17 @@ python -m agent         # all open tickets; safe to run again
 
 Also: `python -m agent --dry-run`, `python -m unittest discover -s tests`, `python -m agent.evaluate --label mine --runs 3`.
 
+## Kaggle GPU alternative
+
+Groq remains the default. Set `AGENT_PROVIDER=local` to run `Qwen/Qwen3-8B` on a CUDA GPU instead; the same parsing, safety rules, helpdesk client and run loop apply. The local provider uses 4-bit loading and requires `requirements-kaggle.txt`. `GROQ_API_KEY` is optional for this provider. Switch back with `AGENT_PROVIDER=groq`.
+
+For Kaggle, use [the evaluation notebook](kaggle/roosterly_gpu_eval.ipynb) in a **private** notebook with `GPU T4 x2` and Internet enabled. Add `HELPDESK_API_KEY` and `CANDIDATE_EMAIL` as Kaggle Secrets. The notebook clones this repository, installs the GPU dependencies, and runs the ten labeled examples without posting actions. The new provider code must be pushed to the GitHub repository before that clone step can work. Review the model's accuracy and full replies before running `python -m agent` to post tickets. Keep secrets and ticket text out of notebook output.
+
+Kaggle is a batch runtime with limited GPU hours, so start a notebook only for an evaluation or ticket run. Model load and generation have not yet been verified on Kaggle hardware.
+
 ## Decisions
 
-1. **The model proposes, code decides.** Groq (`openai/gpt-oss-120b`, strict JSON) proposes a decision; `agent/rules.py` has the final word. Tickets it detects as refund, cancellation, personal data, security, legal or churn (patterns in nl/en/de) are handed off whatever the model said. Close is allowed only for spam or empty tickets. Recognised card numbers and IBANs are removed from the ticket text before the model call and from everything posted.
+1. **The model proposes, code decides.** Groq (`openai/gpt-oss-120b`, strict JSON) or the local Kaggle model proposes a decision; `agent/rules.py` has the final word. Tickets it detects as refund, cancellation, personal data, security, legal or churn (patterns in nl/en/de) are handed off whatever the model said. Close is allowed only for spam or empty tickets. Recognised card numbers and IBANs are removed from the ticket text before the model call and from everything posted.
 2. **"Unsure" is a rule in code.** A reply needs confidence of 0.75 or more and a cited FAQ section. Its numbers, links, menu labels and plan prices are checked against that section (the customer's own numbers and a correct price total are allowed), and a clear language mismatch with the ticket is caught. Otherwise: handoff.
 3. **The helpdesk decides what is already answered,** not a local file, so a rerun is safe on any machine.
 
