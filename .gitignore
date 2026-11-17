@@ -5,6 +5,7 @@
 
 # Assignment PDFs contain the helpdesk key; keep them out of the repo
 *.pdf
+TASKS.md
 
 # Python
 .venv/
@@ -29,3 +30,6 @@ logs/*
 .DS_Store
 .vscode/
 .idea/
+
+# Browser-tool scratch files
+.playwright-mcp/
