@@ -230,11 +230,53 @@ def _to_float(number: str) -> float:
 
 
 _MONEY = r"(?:€|eur|euro)"
-_AMOUNT = rf"{_MONEY}\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*{_MONEY}"
+_AMOUNT = rf"{_MONEY}\s*(\d+(?:[.,]\d+)?)(?:,-)?|(\d+(?:[.,]\d+)?)(?:,-|\s*{_MONEY})"
+_SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])(?<!excl\.)(?<!incl\.)(?<!e\.g\.)(?<!i\.e\.)\s+|\n+")
 
 
 def _amounts(text: str) -> set[float]:
     return {_to_float(a or b) for a, b in re.findall(_AMOUNT, text, re.I)}
+
+
+def _plan_prices(faq_text: str) -> dict[str, float]:
+    """Read each plan's per-employee price from the cited FAQ, never from code constants."""
+    return {name.lower(): _to_float(price) for name, price in re.findall(
+        rf"\b([A-Z]\w+):\s*{_MONEY}\s*(\d+(?:[.,]\d+)?)", faq_text
+    )}
+
+
+def _plan_mentions(text: str, plan_re: re.Pattern[str]) -> list[str]:
+    """Find named plans, including compounds, but ignore 'op basis van' and 'plus VAT'."""
+    text = re.sub(r"\bop\s+basis\s+van\b|\bplus\s+(?:btw|vat|mwst)\b", " ", text, flags=re.I)
+    return list(dict.fromkeys(match.group().lower() for match in plan_re.finditer(text)))
+
+
+def _plan_price_problems(reply: str, faq_text: str) -> list[str]:
+    """Pair plans and known unit prices in reading order; reject ambiguous comparisons."""
+    prices = _plan_prices(faq_text)
+    if not prices:
+        return []
+    plan_re = re.compile(r"(?<!\w)(?:" + "|".join(map(re.escape, prices)) + r")", re.I)
+    problems: list[str] = []
+    for sentence in _SENTENCE_SPLIT_RE.split(reply):
+        plans = _plan_mentions(sentence, plan_re)
+        units = [amount for amount in _amounts_in_order(sentence)
+                 if any(abs(amount - price) < 0.005 for price in prices.values())]
+        if not plans or not units:
+            continue
+        if len(plans) == 1:
+            wrong = any(abs(amount - prices[plans[0]]) >= 0.005 for amount in units)
+        else:
+            wrong = len(plans) != len(units) or any(
+                abs(amount - prices[plan]) >= 0.005 for plan, amount in zip(plans, units)
+            )
+        if wrong:
+            problems.append(f"wrong price for {', '.join(plans)}: {sentence.strip()}")
+    return problems
+
+
+def _amounts_in_order(text: str) -> list[float]:
+    return [_to_float(a or b) for a, b in re.findall(_AMOUNT, text, re.I)]
 
 
 def _allowed_numbers(faq_text: str, ticket_text: str, reply: str = "") -> set[float]:
@@ -242,20 +284,26 @@ def _allowed_numbers(faq_text: str, ticket_text: str, reply: str = "") -> set[fl
 
     - numbers from the cited FAQ sections;
     - numbers the customer wrote ("iOS 15", "25 medewerkers"): repeating them is not a new fact;
-    - a price total (25 employees x EUR 6 = EUR 150), only when one sentence holds the
-      customer's count and the total as money, and the unit price belongs to a plan the
-      reply names. "Plus is EUR 4 ... EUR 100" and "150 free locations" stay unsupported.
+    - a price total (25 employees x EUR 6 = EUR 150), only when the sentence names
+      one plan, or names none and the whole reply names just one. Multi-plan totals
+      are ambiguous and go to a human. The count and money total must share a sentence.
     """
     faq = {_to_float(n) for n in _NUMBER_RE.findall(faq_text)}
     own = {_to_float(n) for n in _NUMBER_RE.findall(ticket_text)}
     allowed = faq | own
-    # "Basis: €4 ..." / "Plus: €6 ..." in F05 -> {"basis": 4.0, "plus": 6.0}
-    plan_prices = {name.lower(): _to_float(price) for name, price in re.findall(rf"\b([A-Z]\w+):\s*{_MONEY}\s*(\d+(?:[.,]\d+)?)", faq_text)}
-    prices = {price for name, price in plan_prices.items() if re.search(rf"\b{name}\b", reply, re.I)}
-    for sentence in re.split(r"(?<=[.!?])\s+|\n+", reply):
+    plan_prices = _plan_prices(faq_text)
+    if not plan_prices:
+        return allowed
+    plan_re = re.compile(r"(?<!\w)(?:" + "|".join(map(re.escape, plan_prices)) + r")", re.I)
+    reply_plans = _plan_mentions(reply, plan_re)
+    for sentence in _SENTENCE_SPLIT_RE.split(reply):
+        sentence_plans = _plan_mentions(sentence, plan_re)
+        plans = sentence_plans or reply_plans
+        if len(plans) != 1:
+            continue
         counts = own & {_to_float(n) for n in _NUMBER_RE.findall(sentence)}
         for total in _amounts(sentence):
-            if any(abs(count * price - total) < 0.005 for count in counts for price in prices):
+            if any(abs(count * plan_prices[plans[0]] - total) < 0.005 for count in counts):
                 allowed.add(total)
     return allowed
 
@@ -270,6 +318,7 @@ def check_grounding(reply: str, faq_ids: list[str] | None = None, *, ticket_text
         problems.append("empty reply")
     allowed_norm = _normal(allowed)
     allowed_numbers = _allowed_numbers(allowed, ticket_text, reply)
+    problems.extend(_plan_price_problems(reply, allowed))
     for number in sorted(set(_NUMBER_RE.findall(reply))):
         if not any(abs(_to_float(number) - ok) < 0.005 for ok in allowed_numbers):
             problems.append(f"unsupported number: {number}")
@@ -405,7 +454,7 @@ def check_translated_reply(reply_en: str, faq_ids: list[str] | None = None, *, m
     allowed, problems = _allowed_faq(faq_ids)
     known = set(_words(allowed))
     # Do not split after abbreviations such as "excl." or "e.g.".
-    sentences = [s.strip() for s in re.split(r"(?<=[.!?])(?<!excl\.)(?<!incl\.)(?<!e\.g\.)(?<!i\.e\.)\s+|\n+", reply_en) if s.strip()]
+    sentences = [s.strip() for s in _SENTENCE_SPLIT_RE.split(reply_en) if s.strip()]
     checked = 0
     for sentence in sentences:
         if _COURTESY_SENTENCE_RE.fullmatch(sentence):
@@ -426,6 +475,42 @@ def check_translated_reply(reply_en: str, faq_ids: list[str] | None = None, *, m
     if not checked:
         problems.append("no substantive reply")
     return GroundingResult(not problems, problems)
+
+
+_LANGUAGE_WORDS = {
+    "nl": {"de", "het", "een", "en", "naar", "voor", "met", "van", "je", "jij", "u", "uw", "kun", "kunt", "ga", "klik", "op", "als", "dan", "ik", "mijn", "hoe", "wat", "kan"},
+    "en": {"the", "and", "to", "for", "with", "from", "you", "your", "can", "go", "click", "on", "if", "then", "please", "are", "of", "at", "this", "that", "be", "will", "which", "there", "see", "no", "how", "what"},
+    "de": {"der", "die", "das", "ein", "eine", "und", "zu", "zum", "zur", "mit", "von", "sie", "ihre", "konnen", "gehen", "klicken", "auf", "wenn", "werden", "ist", "sind", "nicht", "ich", "mein", "wie", "kann"},
+}
+_GREETING_LINE_RE = re.compile(r"^\s*(?:hi|hello|hey|dear|hoi|beste|hallo|liebe[rs]?|sehr\s+geehrte[rs]?)\b[^,\n]*,", re.I)
+# Three strong cues identify a ticket; two competing cues are enough to stop a reply.
+_LANGUAGE_CONFIDENT_HITS = 3
+_LANGUAGE_MISMATCH_HITS = 2
+
+
+def _language_scores(text: str) -> dict[str, int]:
+    """Count language cues after excluding greetings, URLs, quoted labels and menu paths."""
+    text = _GREETING_LINE_RE.sub(" ", text)
+    for pattern in (_QUOTE_RE, _URL_RE, _PATH_RE):
+        text = pattern.sub(" ", text)
+    words = re.findall(r"[a-z]+", _fold(text))
+    return {language: sum(word in cues for word in words) for language, cues in _LANGUAGE_WORDS.items()}
+
+
+def detect_reply_language(text: str) -> str | None:
+    """Return a language only when at least three cues beat the runner-up twofold."""
+    scores = _language_scores(text)
+    ranked = sorted(scores, key=scores.get, reverse=True)
+    return ranked[0] if scores[ranked[0]] >= _LANGUAGE_CONFIDENT_HITS and scores[ranked[0]] >= 2 * scores[ranked[1]] else None
+
+
+def _reply_language_mismatch(text: str, expected: str) -> bool:
+    """Catch a clear competing language, including mixed replies with a foreign clause."""
+    if expected not in _LANGUAGE_WORDS:
+        return False
+    scores = _language_scores(text)
+    other = max(score for language, score in scores.items() if language != expected)
+    return (other >= _LANGUAGE_MISMATCH_HITS and other >= scores[expected]) or other >= _LANGUAGE_CONFIDENT_HITS
 
 
 def _add_override(decision: Decision, name: str) -> None:
@@ -471,9 +556,13 @@ def apply_rules(ticket: dict, decision: Decision, *, translate: Callable[[str, s
         _force_handoff(decision, "close_not_allowed", original_action, original_context)
     if decision.action == "reply":
         ticket_text = f"{subject} {body}"
-        grounding = check_grounding(decision.draft_reply, decision.faq_ids, ticket_text=ticket_text)
-        if not grounding.ok:
+        ticket_language = detect_reply_language(ticket_text)
+        if ticket_language is not None and ticket_language != decision.language:
+            _force_handoff(decision, "ticket_language_mismatch", original_action, original_context)
+        elif not check_grounding(decision.draft_reply, decision.faq_ids, ticket_text=ticket_text).ok:
             _force_handoff(decision, "ungrounded_reply", original_action, original_context)
+        elif _reply_language_mismatch(decision.draft_reply, decision.language):
+            _force_handoff(decision, "reply_language_mismatch", original_action, original_context)
         elif decision.language != "en" and translate is None:
             # Nobody here reads Dutch or German: without a back-translation the reply is unchecked.
             _force_handoff(decision, "translation_check_missing", original_action, original_context)

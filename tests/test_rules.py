@@ -9,7 +9,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from agent.rules import (  # noqa: E402
     apply_rules, check_grounding, check_translated_reply, contains_payment_data,
-    detect_mandatory_handoff, is_spam_or_empty, sanitize_for_log, scrub_payment_data,
+    detect_mandatory_handoff, detect_reply_language, is_spam_or_empty,
+    sanitize_for_log, scrub_payment_data,
 )
 from agent.rules import _version_problems  # noqa: E402
 from agent.schema import Decision  # noqa: E402
@@ -138,6 +139,111 @@ class GroundingTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertTrue(any("free laptop" in p for p in result.problems))
         self.assertFalse(check_translated_reply("Thanks! Kind regards.", ["F01"]).ok)
+
+    def test_plan_price_is_tied_to_named_plan(self):
+        for reply in ("Plus costs €4 per employee per month.",
+                      "Basis costs €6 per employee per month.",
+                      "€4 per employee per month for Plus.",
+                      "Plus kost €4 per actieve medewerker per maand.",
+                      "Basis is €6 and Plus is €4 per employee per month.",
+                      "€6 for Basis and €4 for Plus per employee per month."):
+            with self.subTest(reply=reply):
+                result = check_grounding(reply, ["F05"])
+                self.assertFalse(result.ok)
+                self.assertTrue(any("wrong price for" in p for p in result.problems))
+        for reply in ("Basis is €4 and Plus is €6 per employee per month.",
+                      "Basis costs €4 and Plus costs €6 per active employee per month.",
+                      "Basis kost €4 en Plus €6 per actieve medewerker per maand.",
+                      "Basis kostet 4 € und Plus kostet 6 € pro Mitarbeiter.",
+                      "Upgrading from Basis to Plus raises the price from €4 to €6.",
+                      "Van Basis naar Plus gaat de prijs van €4 naar €6.",
+                      "Both Basis and Plus are billed per active employee: €4 and €6 respectively.",
+                      "Basis kost per medewerker per maand €4 plus btw.",
+                      "Plus costs €6 per employee, so 25 employees cost €150 per month."):
+            with self.subTest(reply=reply):
+                self.assertTrue(check_grounding(reply, ["F05"], ticket_text="Price for 25 employees?").ok)
+
+    def test_wrong_totals_compounds_and_abbreviated_prices(self):
+        ticket = "Wat kost Plus voor 25 medewerkers?"
+        for reply in ("Plus costs €6 per employee. Basis costs €4, so for 25 employees on Plus you pay €100.",
+                      "Op basis van 25 medewerkers kost Plus €100 per maand.",
+                      "Het Plusabonnement kost €4 per medewerker.",
+                      "Het pluspakket kost €4.",
+                      "Plus is the upgrade from Basis and costs €4 per employee.",
+                      "Plus kost 4,- per medewerker.",
+                      "Plus kost excl. btw €4 per medewerker."):
+            with self.subTest(reply=reply):
+                self.assertFalse(check_grounding(reply, ["F05"], ticket_text=ticket).ok)
+
+
+class ReplyLanguageTests(unittest.TestCase):
+    def test_quoted_dutch_ui_labels_do_not_change_detected_language(self):
+        cases = [
+            ("Go to app.roosterly.nl/login and click \"Wachtwoord vergeten\" to reset your password.", "en"),
+            ("Gehen Sie zu Instellingen → Abonnement und klicken Sie auf \"Wachtwoord vergeten\".", "de"),
+            ("Ga naar app.roosterly.nl/login en klik op \"Wachtwoord vergeten\" om je wachtwoord te herstellen.", "nl"),
+        ]
+        for reply, expected in cases:
+            with self.subTest(expected=expected):
+                self.assertEqual(detect_reply_language(reply), expected)
+
+    def test_short_ambiguous_reply_is_not_blocked(self):
+        self.assertIsNone(detect_reply_language("Click the button."))
+        self.assertIsNone(detect_reply_language('"Wachtwoord vergeten"'))
+
+    def test_clear_wrong_language_forces_handoff(self):
+        reply = 'Go to app.roosterly.nl/login and click "Wachtwoord vergeten" to reset your password.'
+        decision = apply_rules({"subject": "Wachtwoord vergeten"}, _decision(draft_reply=reply),
+                               translate=lambda text, language: text)
+        self.assertEqual(decision.action, "handoff")
+        self.assertIn("reply_language_mismatch", decision.overrides)
+        self.assertEqual(decision.draft_reply, "")
+
+    def test_wrong_plan_price_forces_handoff(self):
+        decision = apply_rules({"subject": "Wat kost Plus?"}, _decision(
+            category="billing", draft_reply="Plus kost €4 per actieve medewerker per maand.", faq_ids=["F05"]),
+            translate=lambda text, language: "Plus costs €4 per active employee per month.")
+        self.assertEqual(decision.action, "handoff")
+        self.assertIn("ungrounded_reply", decision.overrides)
+
+    def test_short_foreign_and_mixed_replies_are_withheld(self):
+        cases = [
+            ("See status.roosterly.nl for current outages and planned maintenance.", "F11"),
+            ("Die App funktioniert ab iOS 16 und Android 10.", "F12"),
+            ("Alle Daten werden in der EU (Frankfurt, Deutschland) gespeichert.", "F09"),
+            ('Ga naar app.roosterly.nl/login en klik op "Wachtwoord vergeten". '
+             'The reset link is valid for 60 minutes; no email within 10 minutes? Check your spam folder.', "F01"),
+        ]
+        for reply, faq_id in cases:
+            with self.subTest(reply=reply):
+                decision = apply_rules({}, _decision(draft_reply=reply, faq_ids=[faq_id]),
+                                       translate=lambda text, language: text)
+                self.assertEqual(decision.action, "handoff")
+                self.assertIn("reply_language_mismatch", decision.overrides)
+
+    def test_model_language_label_is_checked_against_ticket(self):
+        ticket = {"subject": "Wachtwoord vergeten", "body": "Ik ben mijn wachtwoord vergeten, hoe herstel ik mijn wachtwoord?"}
+        reply = 'Go to app.roosterly.nl/login and click "Wachtwoord vergeten" to reset your password.'
+        decision = apply_rules(ticket, _decision(language="en", draft_reply=reply))
+        self.assertEqual(decision.action, "handoff")
+        self.assertIn("ticket_language_mismatch", decision.overrides)
+
+    def test_faithful_replies_and_tickets_in_three_languages_stay_replies(self):
+        cases = [
+            ("nl", "Ik ben mijn wachtwoord vergeten, hoe herstel ik mijn wachtwoord?",
+             'Ga naar app.roosterly.nl/login en klik op "Wachtwoord vergeten" om je wachtwoord te herstellen.'),
+            ("en", "I need help with my password. How can I reset it?",
+             'Go to app.roosterly.nl/login and click "Wachtwoord vergeten" to reset your password.'),
+            ("de", "Wie kann ich mein Passwort zurücksetzen?",
+             'Gehen Sie zu app.roosterly.nl/login und klicken Sie auf "Wachtwoord vergeten".'),
+        ]
+        for language, body, reply in cases:
+            with self.subTest(language=language):
+                decision = apply_rules({"body": body}, _decision(language=language, draft_reply=reply),
+                                       translate=lambda text, source: "Go to app.roosterly.nl/login and click "
+                                                                      "Wachtwoord vergeten to reset your password.")
+                self.assertEqual(decision.action, "reply")
+                self.assertEqual(decision.overrides, [])
 
 
 class ApplyRulesTests(unittest.TestCase):
