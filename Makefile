@@ -1,7 +1,7 @@
 # Short commands for the agent. Run `make` to see them.
 PY := .venv/bin/python
 
-.PHONY: help run dry test eval compare status reset final crash
+.PHONY: help run dry test eval compare status reset final crash preview
 
 help:
 	@echo "make run      process all open tickets (posts to the helpdesk)"
@@ -9,6 +9,7 @@ help:
 	@echo "make test     offline tests"
 	@echo "make eval     score the 10 labelled examples (read-only)"
 	@echo "make compare  show the saved before/after evaluation"
+	@echo "make preview T=T005   show the full reply or handoff note for a ticket (posts nothing)"
 	@echo "make status   open and handled ticket counts"
 	@echo "make reset    re-open all 30 practice tickets"
 	@echo "make final    reset, then one clean run of all 30 (the scored run)"
@@ -39,3 +40,6 @@ final: reset run
 
 crash:
 	$(PY) scripts/crash_test.py
+
+preview:
+	$(PY) scripts/preview.py $(T)
