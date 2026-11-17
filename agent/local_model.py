@@ -4,7 +4,12 @@ This module has no import-time GPU work. Groq remains the default provider.
 """
 from __future__ import annotations
 
+import os
 from functools import lru_cache
+
+# Transformers does not need TensorFlow for this PyTorch-only provider. Prevent
+# TensorFlow's CUDA probe from printing a misleading no-driver warning on Kaggle.
+os.environ.setdefault("USE_TF", "0")
 
 
 class LocalModel:
@@ -24,7 +29,7 @@ class LocalModel:
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
             device_map="auto",
-            torch_dtype=torch.float16,
+            dtype=torch.float16,
             quantization_config=quantization,
         )
         self.model.eval()
@@ -39,7 +44,10 @@ class LocalModel:
             output = self.model.generate(
                 **encoded,
                 max_new_tokens=max_new_tokens,
-                do_sample=False,
+                do_sample=True,
+                temperature=0.7,
+                top_p=0.8,
+                top_k=20,
                 pad_token_id=self.tokenizer.eos_token_id,
             )
         new_tokens = output[0][input_tokens:]
