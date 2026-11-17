@@ -1,31 +1,32 @@
 {
-  "run_id": "41b20d9a",
+  "run_id": "9eac1e0e",
   "dry_run": false,
   "open_at_start": 30,
   "recovered_after_crash": 0,
   "outcomes": {
-    "posted": 30
+    "posted": 29,
+    "posted_confirmed_after_timeout": 1
   },
   "actions": {
     "reply": 10,
     "handoff": 18,
     "close": 2
   },
-  "seconds": 105.1,
+  "seconds": 107.0,
   "groq_usage": {
-    "calls": 40,
-    "prompt_tokens": 69891,
-    "completion_tokens": 19168,
-    "cached_tokens": 61440,
-    "total_tokens": 89059
+    "calls": 41,
+    "prompt_tokens": 70102,
+    "completion_tokens": 20151,
+    "cached_tokens": 59392,
+    "total_tokens": 90253
   },
   "helpdesk_requests": {
-    "requests": 64,
-    "writes": 30,
-    "retries_503": 1,
+    "requests": 66,
+    "writes": 32,
+    "retries_503": 2,
     "retries_429": 0
   },
-  "note": "Summary printed by `python -m agent` for the final practice run (reset, then all 30 tickets). Per-ticket lines are in logs/decisions.jsonl.",
+  "note": "Summary printed by python -m agent for the final practice run (reset, then all 30 tickets). Per-ticket lines are in logs/decisions.jsonl.",
   "price_usd_per_1m_tokens": {
     "input": 0.15,
     "cached_input": 0.075,

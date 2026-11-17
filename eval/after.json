@@ -1,10 +1,10 @@
 {
   "label": "after",
-  "created": "2026-11-17T06:27:54+00:00",
+  "created": "2026-11-17T18:50:43+00:00",
   "model": "openai/gpt-oss-120b",
   "prompt_version": 2,
-  "code_revision": "f2eb7a9+uncommitted",
-  "source_sha": "5a1b038c64145365",
+  "code_revision": "3efade5+uncommitted",
+  "source_sha": "87325e33fe35b092",
   "inputs": {
     "prompt_sha": "ee1ab04e5ac609ae",
     "faq_sha": "a89d6b41c2326c52",
@@ -35,15 +35,19 @@
           },
           "got": {
             "action": "handoff",
-            "category": "bug",
+            "category": "question",
             "priority": "P2",
             "language": "en"
           },
-          "engine_action": "handoff",
-          "faq_ids": [],
-          "overrides": [],
+          "engine_action": "reply",
+          "faq_ids": [
+            "F12"
+          ],
+          "overrides": [
+            "translation_check_failed"
+          ],
           "action_ok": false,
-          "category_ok": true,
+          "category_ok": false,
           "priority_ok": false,
           "language_ok": true,
           "unsafe": false,
@@ -59,25 +63,23 @@
             "language": "nl"
           },
           "got": {
-            "action": "handoff",
+            "action": "reply",
             "category": "billing",
-            "priority": "P2",
+            "priority": "P3",
             "language": "nl"
           },
           "engine_action": "reply",
           "faq_ids": [
             "F06"
           ],
-          "overrides": [
-            "translation_check_failed"
-          ],
-          "action_ok": false,
+          "overrides": [],
+          "action_ok": true,
           "category_ok": true,
           "priority_ok": false,
           "language_ok": true,
           "unsafe": false,
-          "over_handoff": true,
-          "useful_reply": false
+          "over_handoff": false,
+          "useful_reply": true
         },
         {
           "id": "E03",
@@ -246,9 +248,7 @@
           },
           "engine_action": "handoff",
           "faq_ids": [],
-          "overrides": [
-            "priority_raised:P2"
-          ],
+          "overrides": [],
           "action_ok": true,
           "category_ok": true,
           "priority_ok": true,
@@ -287,14 +287,14 @@
         }
       ],
       "totals": {
-        "action": 6,
-        "category": 10,
+        "action": 7,
+        "category": 9,
         "priority": 8,
         "language": 10,
         "examples": 10,
         "unsafe": 0,
-        "over_handoff": 4,
-        "useful_replies": 2,
+        "over_handoff": 3,
+        "useful_replies": 3,
         "reply_examples": 6
       }
     },
@@ -336,7 +336,7 @@
           "got": {
             "action": "reply",
             "category": "billing",
-            "priority": "P2",
+            "priority": "P3",
             "language": "nl"
           },
           "engine_action": "reply",
@@ -519,9 +519,7 @@
           },
           "engine_action": "handoff",
           "faq_ids": [],
-          "overrides": [
-            "priority_raised:P2"
-          ],
+          "overrides": [],
           "action_ok": true,
           "category_ok": true,
           "priority_ok": true,
@@ -585,13 +583,9 @@
             "priority": "P2",
             "language": "en"
           },
-          "engine_action": "reply",
-          "faq_ids": [
-            "F12"
-          ],
-          "overrides": [
-            "translation_check_failed"
-          ],
+          "engine_action": "handoff",
+          "faq_ids": [],
+          "overrides": [],
           "action_ok": false,
           "category_ok": true,
           "priority_ok": false,
@@ -692,9 +686,13 @@
             "priority": "P4",
             "language": "nl"
           },
-          "engine_action": "handoff",
-          "faq_ids": [],
-          "overrides": [],
+          "engine_action": "reply",
+          "faq_ids": [
+            "F10"
+          ],
+          "overrides": [
+            "translation_check_failed"
+          ],
           "action_ok": false,
           "category_ok": true,
           "priority_ok": true,
@@ -846,22 +844,22 @@
     }
   ],
   "average": {
-    "action": 7.33,
-    "category": 10.0,
+    "action": 7.67,
+    "category": 9.67,
     "priority": 8.0,
     "language": 10.0,
     "examples": 10.0,
     "unsafe": 0.0,
-    "over_handoff": 2.67,
-    "useful_replies": 3.33,
+    "over_handoff": 2.33,
+    "useful_replies": 3.67,
     "reply_examples": 6.0
   },
   "groq_usage": {
-    "calls": 42,
-    "prompt_tokens": 69802,
-    "completion_tokens": 18306,
-    "cached_tokens": 60160,
-    "total_tokens": 88108
+    "calls": 43,
+    "prompt_tokens": 70008,
+    "completion_tokens": 18227,
+    "cached_tokens": 37120,
+    "total_tokens": 88235
   },
   "helpdesk_requests": {
     "requests": 1,
