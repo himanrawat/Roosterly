@@ -17,9 +17,9 @@ Also: `python -m agent --dry-run`, `python -m unittest discover -s tests`, `pyth
 
 Groq remains the default. Set `AGENT_PROVIDER=local` to run `Qwen/Qwen3-8B` on a CUDA GPU instead; the same parsing, safety rules, helpdesk client and run loop apply. The local provider uses 4-bit loading and requires `requirements-kaggle.txt`. `GROQ_API_KEY` is optional for this provider. Switch back with `AGENT_PROVIDER=groq`.
 
-For Kaggle, use [the evaluation notebook](kaggle/roosterly_gpu_eval.ipynb) with `GPU T4 x2` and Internet enabled. It clones the private `kaggle-gpu-inference` branch from GitHub. Add `GITHUB_READ_TOKEN` (a fine-grained token with read-only access to this repository), `HELPDESK_API_KEY`, and `CANDIDATE_EMAIL` as Kaggle Secrets. The notebook installs the GPU dependencies and runs the ten labeled examples without posting actions. Review the model's accuracy and full replies before running `python -m agent` to post tickets. Keep secrets and ticket text out of notebook output.
+For Kaggle, use [the evaluation notebook](kaggle/roosterly_gpu_eval.ipynb) with `GPU T4 x2` and Internet enabled. It clones the private `kaggle-gpu-inference` branch from GitHub. Add `GITHUB_DEPLOY_KEY` (the repository's read-only deploy key), `HELPDESK_API_KEY`, and `CANDIDATE_EMAIL` as Kaggle Secrets. The notebook installs the GPU dependencies and runs the ten labeled examples without posting actions. Review the model's accuracy and full replies before running `python -m agent` to post tickets. Keep secrets and ticket text out of notebook output.
 
-Kaggle is a batch runtime with limited GPU hours, so start a notebook only for an evaluation or ticket run. Model load and generation have not yet been verified on Kaggle hardware.
+Kaggle is a batch runtime with limited GPU hours, so start a notebook only for an evaluation or ticket run. The T4 evaluation completed in about six minutes. Its first read-only run scored 6/10 actions, 10/10 categories, 7/10 priorities, 10/10 languages, 0 unsafe actions, and 2/6 useful replies. It handed off four tickets labeled for reply. Keep Groq as the live provider while tuning the local model and reviewing its draft replies.
 
 ## Decisions
 
