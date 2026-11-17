@@ -71,7 +71,7 @@ The language the customer wrote in. Handoff notes for the support team are in En
 Any. Free tiers and local models are fine. A paid model should cost well under €1 for the whole assignment.
 We do not reimburse costs.
 
-**May I use Claude Code, Cursor, Copilot or ChatGPT to build it?**
+**May I use AI coding tools to build it?**
 Yes, please. That is how this job is done. Mention in your README how you used them. In the live session you
 will explain your code and change it, so make sure you understand what you submit.
 

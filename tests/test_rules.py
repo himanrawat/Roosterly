@@ -336,7 +336,7 @@ class CalibrationTests(unittest.TestCase):
 
 
 class CrossReviewTests(unittest.TestCase):
-    """Cases raised when Codex (author) and Claude (reviewer) compared notes on this file."""
+    """Cases raised during cross-review of this file."""
 
     def test_topic_words_alone_do_not_force_handoff(self):
         harmless = [
