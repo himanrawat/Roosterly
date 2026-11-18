@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DEFAULT_BASE_URL = "https://nakywgkztvzkihdjnwbc.supabase.co/functions/v1/helpdesk"
-# llama-3.3-70b-versatile was removed from Groq (404 model_not_found, checked 17 Nov 2026).
 DEFAULT_GROQ_MODEL = "openai/gpt-oss-120b"
 
 

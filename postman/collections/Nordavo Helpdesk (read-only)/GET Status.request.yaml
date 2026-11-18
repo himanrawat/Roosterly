@@ -1,0 +1,8 @@
+$kind: http-request
+description: ""
+url: https://nakywgkztvzkihdjnwbc.supabase.co/functions/v1/helpdesk/status
+method: GET
+headers:
+  Authorization: Bearer {{vault:helpdesk_key}}
+  X-Candidate-Email: "{{vault:candidate_email}}"
+order: 1000
