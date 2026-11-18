@@ -35,9 +35,9 @@ At most four requests/second; 503 gets six retries, 429 waits `Retry-After`, 409
 | Before | 7.33 | 7.33 | 7.67 | 10 | 0 |
 | After | 9.67 | 7.67 | 8.00 | 10 | 0 |
 
-One prompt change classified price and invoice questions as `billing`. Safety rules were tuned before this baseline, so results are optimistic. Final run: 30 handled (10 replies, 18 handoffs, 2 closes).
+One prompt change classified price and invoice questions as `billing`. Safety rules were tuned before this baseline, so results are optimistic. Final run: 30 handled (7 replies, 21 handoffs, 2 closes).
 
-**Cost per 100 tickets ≈ $0.061:** (10,710 input × $0.15 + 59,392 cached input × $0.075 + 20,151 output × $0.60) / 1,000,000 × 100/30. Rates are USD per million tokens.
+**Cost per 100 tickets ≈ $0.064:** (35,101 input × $0.15 + 34,816 cached input × $0.075 + 19,032 output × $0.60) / 1,000,000 × 100/30. Rates are USD per million tokens.
 
 ## What I would improve
 
